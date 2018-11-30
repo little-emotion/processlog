@@ -1,13 +1,12 @@
 package processor;
 
 import bean.GpsData;
-import org.apache.spark.SparkConf;
-import org.apache.spark.SparkContext;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.function.MapFunction;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
 
 import java.util.Collections;
 
@@ -27,14 +26,20 @@ public class App {
     public static void main(String[] args){
         String path = "data/test_table";
         long avgTime_MS = 1000*60*60*2;
+        String suffix="";
+        if(args.length>0){
+            suffix=args[0];
+        }
 
         //spark://62.234.212.81:7077
         //local
-        SparkConf conf = new SparkConf().setAppName("test").setMaster("yarn");
-        SparkContext sc = new SparkContext(conf);
-        org.apache.spark.sql.SQLContext sqlContext = new org.apache.spark.sql.SQLContext(sc);
+        SparkSession spark = SparkSession
+                .builder()
+                .appName("Java Spark SQL basic example")
+                .config("spark.some.config.option", "some-value")
+                .getOrCreate();
 
-        Dataset<Row> df = sqlContext.read().parquet(path).toDF();
+        Dataset<Row> df = spark.read().parquet(path).toDF();
         df.createOrReplaceTempView("TDLogDataView");
 
 
@@ -45,7 +50,7 @@ public class App {
             }
         }, Encoders.STRING());
         //modelsDf.javaRDD().saveAsTextFile(outputDir+DEV);
-        modelsDf.write().mode("append").text(outputDir+DEV);
+        modelsDf.write().mode("append").text(outputDir+DEV+suffix);
 
 
         Dataset<Row> appsDf = df.select("deviceId","appName");
@@ -57,7 +62,7 @@ public class App {
                     }
                     return Collections.singletonList(str).iterator();
                 });
-        appRdd.saveAsTextFile(outputDir+APP);
+        appRdd.saveAsTextFile(outputDir+APP+suffix);
 
 
         Dataset<Row> gpsDf = df.select("deviceId","time", "lat", "lng");
@@ -81,7 +86,7 @@ public class App {
                     return Collections.singletonList(str).iterator();
         });
 
-        rowRdd.saveAsTextFile(outputDir+POI);
+        rowRdd.saveAsTextFile(outputDir+POI+suffix);
 
 
     }

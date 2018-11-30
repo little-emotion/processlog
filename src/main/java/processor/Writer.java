@@ -1,19 +1,26 @@
 package processor;
 
 import bean.TDLog;
-import org.apache.spark.SparkConf;
-import org.apache.spark.SparkContext;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class Writer {
     public static void main(String[] args){
-        SparkConf conf = new SparkConf().setAppName("test").setMaster("yarn");
-        SparkContext sc = new SparkContext(conf);
-        org.apache.spark.sql.SQLContext sqlContext = new org.apache.spark.sql.SQLContext(sc);
+        String path = "data/test_table/";
+        if(args.length>0){
+            path+=args[0];
+        }
+
+        SparkSession spark = SparkSession
+                .builder()
+                .appName("Java Spark SQL basic example")
+                .config("spark.some.config.option", "some-value")
+                .getOrCreate();
+
         String[] apps = {"taobao", "baidu", "qq"};
         for(int j = 0;j<8;j++) {
             List<TDLog> tdLogs = new ArrayList<>();
@@ -30,8 +37,8 @@ public class Writer {
             }
 
             // Create a simple DataFrame, store into a partition directory
-            Dataset<Row> squaresDF = sqlContext.createDataFrame(tdLogs, TDLog.class);
-            squaresDF.write().mode("append").parquet("data/test_table/");
+            Dataset<Row> squaresDF = spark.createDataFrame(tdLogs, TDLog.class);
+            squaresDF.write().mode("append").parquet(path);
         }
     }
 }
