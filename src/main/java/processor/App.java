@@ -18,13 +18,13 @@ public class App {
             {"学校","医院","公园","体育中心"},
             {"商业街","工业园区","楼宇相关","广播电视中心"}};
 
-    private static final String outputDir = "output/";
+    private static final String outputDir = "dw/";
     private static final String APP = "app/";
     private static final String DEV = "dev/";
     private static final String POI = "poi/";
 
     public static void main(String[] args){
-        String path = "data/test_table";
+        String parquetPath = "ods/td/";
         long avgTime_MS = 1000*60*60*2;
         String suffix="";
         if(args.length>0){
@@ -35,11 +35,12 @@ public class App {
         //local
         SparkSession spark = SparkSession
                 .builder()
+ //               .master("local")
                 .appName("Java Spark SQL basic example")
                 .config("spark.some.config.option", "some-value")
                 .getOrCreate();
 
-        Dataset<Row> df = spark.read().parquet(path).toDF();
+        Dataset<Row> df = spark.read().parquet(parquetPath+suffix).toDF();
         df.createOrReplaceTempView("TDLogDataView");
 
 

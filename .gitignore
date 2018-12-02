@@ -22,6 +22,8 @@
 .idea/*
 data/
 output/
+dw/
+ods/td/
 processlog.iml
 dependency-reduced-pom.xml
 target/*

@@ -7,16 +7,17 @@ import org.apache.spark.sql.SparkSession;
 
 import java.util.ArrayList;
 import java.util.List;
-
+//processor.Writer
 public class Writer {
     public static void main(String[] args){
-        String path = "data/test_table/";
+        String parquetPath = "ods/td/";
         if(args.length>0){
-            path+=args[0];
+            parquetPath+=args[0];
         }
 
         SparkSession spark = SparkSession
                 .builder()
+                //.master("local")
                 .appName("Java Spark SQL basic example")
                 .config("spark.some.config.option", "some-value")
                 .getOrCreate();
@@ -38,7 +39,7 @@ public class Writer {
 
             // Create a simple DataFrame, store into a partition directory
             Dataset<Row> squaresDF = spark.createDataFrame(tdLogs, TDLog.class);
-            squaresDF.write().mode("append").parquet(path);
+            squaresDF.write().mode("append").parquet(parquetPath);
         }
     }
 }
